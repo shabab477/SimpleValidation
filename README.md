@@ -1,11 +1,11 @@
-# SimpleValidator
+# SimpleValidation
 A lightweight library for common bean validations for Android.
 
 This library is built keeping in mind of the common validation clauses that we need to go through while submitting data from `EditText`-s in Android. At this moment support for only a few clauses are given. They are:
 * `@NotNull` : This annotation checks whether the field is null or not.
 * `@Size` : This annotation works on `String` and `Collection` and checks for maximum and minimum sizes.
 * `@Email` : Checks whether the String is an email address or not.
-* `@Future`: Checks whether date is on the greater than the current date at any instance.
+* `@Future`: Checks whether date is greater than the current date at any instance.
 
 Using the **SimpleValidator** as the name says it is pretty simple. **SimpleValidator** is extremely powerful when using with [Data Binding](https://developer.android.com/topic/libraries/data-binding/) in Android.
 
