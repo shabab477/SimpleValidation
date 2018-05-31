@@ -61,7 +61,7 @@ and to your project build.gradle file:
 
 ```
 dependencies {
-    implementation 'com.github.shabab477:SimpleValidator:1.0.0'
+    implementation 'com.github.shabab477:SimpleValidator:v1.0.0'
 }
 
 ```
