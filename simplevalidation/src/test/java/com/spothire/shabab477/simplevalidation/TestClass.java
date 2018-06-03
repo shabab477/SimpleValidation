@@ -1,5 +1,6 @@
 package com.spothire.shabab477.simplevalidation;
 
+
 import com.spothire.shabab477.simplevalidation.annotation.Size;
 
 public class TestClass {

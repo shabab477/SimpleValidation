@@ -69,4 +69,12 @@ public class ExampleUnitTest {
 
         assert validate.containsKey("email");
     }
+
+    @Test
+    public void checkObject(){
+        RegistrationForm form = new CompanyRegistrationForm();
+        Map<String, String> validate = ValidationProcessor.validate(form);
+
+        assert (validate.size() > 2);
+    }
 }

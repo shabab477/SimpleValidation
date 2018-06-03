@@ -28,27 +28,27 @@ public abstract class ValidationProcessor {
 
         try {
 
-            if(Collection.class.isAssignableFrom(fieldHolder.getField().getType())){
+            if (Collection.class.isAssignableFrom(fieldHolder.getField().getType())) {
                 int length = Collection.class.cast(fieldHolder.getField().get(fieldHolder.getObject())).size();
 
-                if(length < min || length > max){
+                if (length < min || length > max) {
 
                     return false;
                 }
 
-            }else if(String.class.isAssignableFrom(fieldHolder.getField().getType())){
+            } else if (String.class.isAssignableFrom(fieldHolder.getField().getType())) {
                 int length = String.class.cast(fieldHolder.getField().get(fieldHolder.getObject())).length();
 
-                if(length < min || length > max){
+                if (length < min || length > max) {
 
                     return false;
                 }
             }
-        }catch (IllegalAccessException | NullPointerException ex){
+        } catch (IllegalAccessException | NullPointerException ex) {
 
-            ex.printStackTrace();
+            //ex.printStackTrace();
             return false;
-        }finally {
+        } finally {
 
             fieldHolder.getField().setAccessible(false);
         }
@@ -62,9 +62,9 @@ public abstract class ValidationProcessor {
         try {
 
             return fieldHolder.getField().get(fieldHolder.getObject()) != null;
-        }catch (IllegalAccessException ex){
+        } catch (IllegalAccessException ex) {
             ex.printStackTrace();
-        }finally {
+        } finally {
             fieldHolder.getField().setAccessible(false);
         }
 
@@ -75,7 +75,7 @@ public abstract class ValidationProcessor {
         java.util.Date dateOfBirth = null;
         fieldHolder.getField().setAccessible(true);
 
-        if(fieldHolder.getField().getType().equals(java.util.Date.class)){
+        if (fieldHolder.getField().getType().equals(java.util.Date.class)) {
             try {
 
                 dateOfBirth = java.util.Date.class.cast(fieldHolder.getField().get(fieldHolder.getObject()));
@@ -83,13 +83,11 @@ public abstract class ValidationProcessor {
 
                 e.printStackTrace();
                 return false;
-            }
-            finally {
+            } finally {
 
                 fieldHolder.getField().setAccessible(false);
             }
-        }
-        else {
+        } else {
 
             return false;
         }
@@ -105,9 +103,9 @@ public abstract class ValidationProcessor {
         try {
 
             String email = fieldHolder.getField().get(fieldHolder.getObject()).toString();
-            if(email == null){
+            if (email == null) {
                 return false;
-            }else {
+            } else {
                 Pattern compile = Pattern.compile(
                         "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +
                                 "\\@" +
@@ -124,39 +122,43 @@ public abstract class ValidationProcessor {
 
             e.printStackTrace();
             return false;
-        }finally {
+        } finally {
 
             fieldHolder.getField().setAccessible(false);
         }
 
     };
 
-    private static String processMessage(String message, int min, int max){
+    private static String processMessage(String message, int min, int max) {
 
-        return min == Integer.MAX_VALUE? max == Integer.MIN_VALUE? "Field is not valid" : message.replaceAll("\\$\\{max\\}", String.valueOf(max))
-                : (max == Integer.MAX_VALUE ? message.replaceAll("\\$\\{min\\}", String.valueOf(min))  : message
-                                                                                                                .replaceAll("\\$\\{max\\}", String.valueOf(max))
-                                                                                                                .replaceAll("\\$\\{min\\}", String.valueOf(min)));
+        return min == Integer.MAX_VALUE ? max == Integer.MIN_VALUE ? "Field is not valid" : message.replaceAll("\\$\\{max\\}", String.valueOf(max))
+                : (max == Integer.MAX_VALUE ? message.replaceAll("\\$\\{min\\}", String.valueOf(min)) : message
+                .replaceAll("\\$\\{max\\}", String.valueOf(max))
+                .replaceAll("\\$\\{min\\}", String.valueOf(min)));
 
     }
 
     /**
      * This is the utility method that produces the @link java.util.Map of the key value pairs of the errors.
+     *
      * @param object The object to be validated.
      * @return A {@link Map} which has the key value pairs of the errors. The field names in {@link String} will be the key of the error in the Map and the value will be {@link String} error message
      */
-    public static Map<String, String> validate(Object object){
+    public static Map<String, String> validate(Object object) {
 
-        Map<String, String> map = new HashMap<>();
-        Field[] fields = object.getClass().getDeclaredFields();
+        return validateProxy(object, object.getClass(), new HashMap<>());
+    }
 
-        for(Field field : fields){
+    private static Map<String, String> validateProxy(Object object, Class clazz, Map<String, String> map) {
 
+        Field[] fields = clazz.getDeclaredFields();
+
+        for (Field field : fields) {
             FieldHolder holder = new FieldHolder(object, field);
 
-            if(field.isAnnotationPresent(Size.class)){
+            if (field.isAnnotationPresent(Size.class)) {
 
-                if (!fieldSizePredicate.test(holder)){
+                if (!fieldSizePredicate.test(holder)) {
 
                     Size annotation = field.getAnnotation(Size.class);
                     int max = annotation.max();
@@ -164,54 +166,57 @@ public abstract class ValidationProcessor {
 
                     String message = annotation.message();
 
-                    if(message.length() == 0){
+                    if (message.length() == 0) {
 
                         map.put(field.getName(), "Field is not valid");
-                    }
-                    else{
+                    } else {
 
                         map.put(field.getName(), processMessage(message, min, max));
                     }
                 }
             }
 
-            if(field.isAnnotationPresent(NotNull.class)){
-                if(!nullPredicate.test(holder)){
+            if (field.isAnnotationPresent(NotNull.class)) {
+                if (!nullPredicate.test(holder)) {
 
                     NotNull annotation = field.getAnnotation(NotNull.class);
                     String message = annotation.message();
 
-                    if(message.length() == 0){
+                    if (message.length() == 0) {
 
                         map.put(field.getName(), "Field is not valid");
-                    }
-                    else{
+                    } else {
 
                         map.put(field.getName(), message);
                     }
                 }
             }
 
-            if(field.isAnnotationPresent(Future.class)){
+            if (field.isAnnotationPresent(Future.class)) {
 
-                if(!dateFuturePredicate.test(holder)){
+                if (!dateFuturePredicate.test(holder)) {
                     map.put(field.getName(), "Date must be in the future");
                 }
             }
 
-            if(field.isAnnotationPresent(Email.class)){
+            if (field.isAnnotationPresent(Email.class)) {
 
-                if(!emailPredicate.test(holder)){
+                if (!emailPredicate.test(holder)) {
 
                     map.put(field.getName(), "Not a valid email");
                 }
             }
         }
 
+        if (clazz.getSuperclass() != null) {
+
+            return validateProxy(object, clazz.getSuperclass(), map);
+        }
+
         return map;
     }
 
-    private static class FieldHolder{
+    private static class FieldHolder {
 
         private Object object;
 
@@ -241,10 +246,11 @@ public abstract class ValidationProcessor {
 
     /**
      * Because Java 8 functional interfaces requires API Level 24 to function
+     *
      * @param <T> Any object to test against
      */
     @FunctionalInterface
-    private interface Predicate<T>{
+    private interface Predicate<T> {
 
         boolean test(T object);
     }
