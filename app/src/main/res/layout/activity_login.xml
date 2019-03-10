@@ -1,23 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <android.support.design.widget.AppBarLayout
+    <data>
+        <import type="java.util.Map"/>
+        <variable
+            name="vm"
+            type="com.shabab477.simplevalidator.LoginVM" />
+    </data>
+
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent"
+        tools:context=".LoginActivity">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-    </android.support.design.widget.AppBarLayout>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-</android.support.design.widget.CoordinatorLayout>
+        </android.support.design.widget.AppBarLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            >
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:layout_gravity="center"
+                android:hint="User Name"
+                android:errorText='@{vm.errorMap["name"]}'
+                android:inputType="textPersonName"
+                android:text="@={vm.name}" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:errorText='@{vm.errorMap["password"]}'
+                android:hint="Password"
+                android:layout_gravity="center"
+                android:inputType="textPersonName"
+                android:text="@={vm.password}" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:errorText='@{vm.errorMap["userCode"]}'
+                android:hint="User Code"
+                android:layout_gravity="center"
+                android:inputType="textPersonName"
+                android:text="@={vm.userCode}" />
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:padding="10dp"
+                android:background="@android:color/holo_orange_light"
+                android:text="Login"
+                android:onClick="@{view -> vm.validateViewModel()}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            />
+        </LinearLayout>
+
+
+    </android.support.design.widget.CoordinatorLayout>
+</layout>

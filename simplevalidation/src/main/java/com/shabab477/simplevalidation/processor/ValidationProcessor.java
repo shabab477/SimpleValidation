@@ -7,6 +7,7 @@ import com.shabab477.simplevalidation.annotation.NotNull;
 import com.shabab477.simplevalidation.annotation.Size;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,11 +132,15 @@ public abstract class ValidationProcessor {
 
     private static String processMessage(String message, int min, int max) {
 
-        return min == Integer.MAX_VALUE ? max == Integer.MIN_VALUE ? "Field is not valid" : message.replaceAll("\\$\\{max\\}", String.valueOf(max))
-                : (max == Integer.MAX_VALUE ? message.replaceAll("\\$\\{min\\}", String.valueOf(min)) : message
-                .replaceAll("\\$\\{max\\}", String.valueOf(max))
-                .replaceAll("\\$\\{min\\}", String.valueOf(min)));
-
+        if (min == Integer.MAX_VALUE && max == Integer.MIN_VALUE) {
+            return message == null? "Field is not valid" : message;
+        } else if (message != null) {
+            return message
+                        .replaceAll("\\$\\{max\\}", String.valueOf(max))
+                        .replaceAll("\\$\\{min\\}", String.valueOf(min));
+        } else {
+            return "Field is not valid";
+        }
     }
 
     /**
@@ -144,22 +149,24 @@ public abstract class ValidationProcessor {
      * @param object The object to be validated.
      * @return A {@link Map} which has the key value pairs of the errors. The field names in {@link String} will be the key of the error in the Map and the value will be {@link String} error message
      */
-    public static Map<String, String> validate(Object object) {
+    public static HashMap<String, String> validate(Object object) {
 
         return validateProxy(object, object.getClass(), new HashMap<>());
     }
 
-    private static Map<String, String> validateProxy(Object object, Class clazz, Map<String, String> map) {
+    private static HashMap<String, String> validateProxy(Object object, Class clazz, HashMap<String, String> map) {
 
         Field[] fields = clazz.getDeclaredFields();
 
         for (Field field : fields) {
             FieldHolder holder = new FieldHolder(object, field);
+            boolean hasError = false;
 
             if (field.isAnnotationPresent(Size.class)) {
 
                 if (!fieldSizePredicate.test(holder)) {
 
+                    hasError = true;
                     Size annotation = field.getAnnotation(Size.class);
                     int max = annotation.max();
                     int min = annotation.min();
@@ -176,7 +183,7 @@ public abstract class ValidationProcessor {
                 }
             }
 
-            if (field.isAnnotationPresent(NotNull.class)) {
+            if (field.isAnnotationPresent(NotNull.class) && !hasError) {
                 if (!nullPredicate.test(holder)) {
 
                     NotNull annotation = field.getAnnotation(NotNull.class);
@@ -192,14 +199,14 @@ public abstract class ValidationProcessor {
                 }
             }
 
-            if (field.isAnnotationPresent(Future.class)) {
+            if (field.isAnnotationPresent(Future.class) && !hasError) {
 
                 if (!dateFuturePredicate.test(holder)) {
                     map.put(field.getName(), "Date must be in the future");
                 }
             }
 
-            if (field.isAnnotationPresent(Email.class)) {
+            if (field.isAnnotationPresent(Email.class) && !hasError) {
 
                 if (!emailPredicate.test(holder)) {
 
@@ -208,7 +215,7 @@ public abstract class ValidationProcessor {
             }
         }
 
-        if (clazz.getSuperclass() != null) {
+        if (clazz.getSuperclass() != null && !Modifier.isAbstract(clazz.getSuperclass().getModifiers())) {
 
             return validateProxy(object, clazz.getSuperclass(), map);
         }
