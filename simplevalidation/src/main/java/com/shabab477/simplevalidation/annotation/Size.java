@@ -24,7 +24,7 @@ public @interface Size {
 
     int size() default Integer.MAX_VALUE;
 
-    int min() default Integer.MAX_VALUE;
+    int min() default Integer.MIN_VALUE;
 
-    int max() default Integer.MIN_VALUE;
+    int max() default Integer.MAX_VALUE;
 }

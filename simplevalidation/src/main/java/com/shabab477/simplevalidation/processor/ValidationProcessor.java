@@ -1,5 +1,6 @@
 package com.shabab477.simplevalidation.processor;
 
+import android.util.Log;
 
 import com.shabab477.simplevalidation.annotation.Email;
 import com.shabab477.simplevalidation.annotation.Future;
@@ -25,6 +26,7 @@ public abstract class ValidationProcessor {
 
         int min = size.min();
         int max = size.max();
+        int sz = size.size();
         fieldHolder.getField().setAccessible(true);
 
         try {
@@ -32,36 +34,40 @@ public abstract class ValidationProcessor {
             if (Collection.class.isAssignableFrom(fieldHolder.getField().getType())) {
                 int length = ((Collection) fieldHolder.getField().get(fieldHolder.getObject())).size();
 
-                if (length < min || length > max) {
+                if (length >= min && length <= max) {
 
-                    return false;
+                    if (sz == Integer.MAX_VALUE) {
+                        return true;
+                    } else {
+                        return sz == length;
+                    }
                 }
 
             } else if (String.class.isAssignableFrom(fieldHolder.getField().getType())) {
                 int length = ((String) fieldHolder.getField().get(fieldHolder.getObject())).length();
 
-                if (length < min || length > max) {
-
-                    return false;
+                if (length >= min && length <= max) {
+                    if (sz == Integer.MAX_VALUE) {
+                        return true;
+                    } else {
+                        return sz == length;
+                    }
                 }
             }
         } catch (IllegalAccessException | NullPointerException ex) {
-
-            //ex.printStackTrace();
+//            ex.printStackTrace();
             return false;
         } finally {
-
             fieldHolder.getField().setAccessible(false);
         }
 
-        return true;
+        return false;
     };
 
     private static final Predicate<FieldHolder> nullPredicate = fieldHolder -> {
         fieldHolder.getField().setAccessible(true);
 
         try {
-
             return fieldHolder.getField().get(fieldHolder.getObject()) != null;
         } catch (IllegalAccessException ex) {
             ex.printStackTrace();
@@ -78,18 +84,14 @@ public abstract class ValidationProcessor {
 
         if (fieldHolder.getField().getType().equals(java.util.Date.class)) {
             try {
-
-                dateOfBirth = java.util.Date.class.cast(fieldHolder.getField().get(fieldHolder.getObject()));
+               dateOfBirth = java.util.Date.class.cast(fieldHolder.getField().get(fieldHolder.getObject()));
             } catch (IllegalAccessException e) {
-
                 e.printStackTrace();
                 return false;
             } finally {
-
                 fieldHolder.getField().setAccessible(false);
             }
         } else {
-
             return false;
         }
 
@@ -100,10 +102,9 @@ public abstract class ValidationProcessor {
 
     private static final Predicate<FieldHolder> emailPredicate = fieldHolder -> {
         fieldHolder.getField().setAccessible(true);
-
         try {
-
             String email = fieldHolder.getField().get(fieldHolder.getObject()).toString();
+
             if (email == null) {
                 return false;
             } else {
@@ -120,18 +121,14 @@ public abstract class ValidationProcessor {
                 return compile.matcher(email).matches();
             }
         } catch (IllegalAccessException e) {
-
             e.printStackTrace();
             return false;
         } finally {
-
             fieldHolder.getField().setAccessible(false);
         }
-
     };
 
     private static String processMessage(String message, int min, int max) {
-
         if (min == Integer.MAX_VALUE && max == Integer.MIN_VALUE) {
             return message == null? "Field is not valid" : message;
         } else if (message != null) {
@@ -150,7 +147,6 @@ public abstract class ValidationProcessor {
      * @return A {@link Map} which has the key value pairs of the errors. The field names in {@link String} will be the key of the error in the Map and the value will be {@link String} error message
      */
     public static HashMap<String, String> validate(Object object) {
-
         return validateProxy(object, object.getClass(), new HashMap<>());
     }
 
@@ -163,9 +159,7 @@ public abstract class ValidationProcessor {
             boolean hasError = false;
 
             if (field.isAnnotationPresent(Size.class)) {
-
                 if (!fieldSizePredicate.test(holder)) {
-
                     hasError = true;
                     Size annotation = field.getAnnotation(Size.class);
                     int max = annotation.max();
@@ -185,7 +179,6 @@ public abstract class ValidationProcessor {
 
             if (field.isAnnotationPresent(NotNull.class) && !hasError) {
                 if (!nullPredicate.test(holder)) {
-
                     NotNull annotation = field.getAnnotation(NotNull.class);
                     String message = annotation.message();
 
@@ -200,23 +193,19 @@ public abstract class ValidationProcessor {
             }
 
             if (field.isAnnotationPresent(Future.class) && !hasError) {
-
                 if (!dateFuturePredicate.test(holder)) {
                     map.put(field.getName(), "Date must be in the future");
                 }
             }
 
             if (field.isAnnotationPresent(Email.class) && !hasError) {
-
                 if (!emailPredicate.test(holder)) {
-
-                    map.put(field.getName(), "Not a valid email");
+                  map.put(field.getName(), "Not a valid email");
                 }
             }
         }
 
         if (clazz.getSuperclass() != null && !Modifier.isAbstract(clazz.getSuperclass().getModifiers())) {
-
             return validateProxy(object, clazz.getSuperclass(), map);
         }
 

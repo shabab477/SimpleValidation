@@ -9,6 +9,8 @@ public class CommonBindingAdapter {
     public static void setErrorMessage(EditText view, String errorMessage) {
         if (errorMessage != null) {
             view.setError(errorMessage);
+        } else {
+            view.setError(null);
         }
     }
 }

@@ -75,6 +75,6 @@ public class ExampleUnitTest {
         RegistrationForm form = new CompanyRegistrationForm();
         Map<String, String> validate = ValidationProcessor.validate(form);
 
-        assert (validate.size() > 2);
+        assertEquals(2, validate.size());
     }
 }

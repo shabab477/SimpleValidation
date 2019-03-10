@@ -2,6 +2,8 @@ package com.shabab477.simplevalidator;
 
 
 
+import android.util.Log;
+
 import com.shabab477.simplevalidation.annotation.NotNull;
 import com.shabab477.simplevalidation.annotation.Size;
 import com.shabab477.simplevalidation.processor.ValidationProcessor;

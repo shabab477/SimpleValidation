@@ -2,7 +2,6 @@ package com.shabab477.simplevalidator;
 
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
-import android.util.Log;
 import android.view.View;
 
 import java.util.HashMap;

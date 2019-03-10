@@ -8,7 +8,6 @@ public class TestClass {
     @Size(min = 10, max = 100, message = "Name must be within ${min} and ${max} characters")
     private String name;
 
-
     public TestClass(String name) {
         this.name = name;
     }
