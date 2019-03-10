@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Simple Validator</string>
+    <string name="title_activity_login">LoginActivity</string>
 </resources>
